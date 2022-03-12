@@ -1,4 +1,5 @@
-def snake_to_camel(word):
-        return ''.join(x.capitalize() for x in word.split('_'))
-
-print(snake_to_camel(input()))
+import re
+pattern = '([a-z]+)'
+results = re.findall(pattern, input())
+for i in results :
+    print(i.capitalize(), end = "")
