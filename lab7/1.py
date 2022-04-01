@@ -2,49 +2,50 @@ import pygame
 from datetime import datetime
 
 pygame.init()
-
 screen = pygame.display.set_mode((500, 500))
-running = True
 
-center = screen.get_rect().center
 
-WHITE = (255, 255, 255)
-clock = pygame.time.Clock()
-FPS = 60
+def blitRotate(surf, image, pos, originPos, angle):
+    # offset from pivot to center
+    image_rect = image.get_rect(topleft=(pos[0] - originPos[0], pos[1] - originPos[1]))
+    offset_center_to_pivot = pygame.math.Vector2(pos) - image_rect.center
 
-def clock_loader(path, angle) :
-    image = pygame.image.load(path)
-    w, h = image.get_size()
-    box = [pygame.math.Vector2(p) for p in [(0, 0), (w, 0), (w, -h), (0, -h)]]
-    print(box)
-    box_rotate = [p.rotate(angle) for p in box]
-    print(box_rotate)
+    # roatated offset from pivot to center
+    rotated_offset = offset_center_to_pivot.rotate(angle)
 
-    min_box = (min(box_rotate, key=lambda p: p[0])[0], min(box_rotate, key=lambda p: p[1])[1])
-    max_box = (max(box_rotate, key=lambda p: p[0])[0], max(box_rotate, key=lambda p: p[1])[1])
+    # roatetd image center
+    rotated_image_center = (pos[0] - rotated_offset.x, pos[1] - rotated_offset.y)
 
-    origin = (center[0] + min_box[0], center[1] - max_box[1])
+    # get a rotated image
+    rotated_image = pygame.transform.rotate(image, -angle)
+    rotated_image_rect = rotated_image.get_rect(center=rotated_image_center)
 
-    rotated_image = pygame.transform.rotate(image, angle)
-    screen.blit(rotated_image, origin)
+    # rotate and blit the image
+    surf.blit(rotated_image, rotated_image_rect)
 
-while running:
+
+seconds = pygame.image.load('images/big.png')
+minutes = pygame.image.load('images/small.png')
+seconds = pygame.transform.scale(seconds, (50, 100))
+minutes = pygame.transform.scale(minutes, (30, 60))
+
+bg = pygame.image.load('images/mickey-clock.jpg')
+w, h = seconds.get_size()
+
+done = False
+while not done:
+    angle = datetime.now().second * 6
+    min = datetime.now().minute * 6
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
-        
-    screen.fill(WHITE)
+            done = True
 
-    angle_minutes = datetime.now().minute * 6 + 180
-    angle_seconds = datetime.now().second * 6 + 180
-    clock_loader('images/minutes.png', -angle_minutes)
-    clock_loader('images/seconds.png', -angle_seconds)
+    pos = (screen.get_width() / 2, screen.get_height() / 2)
+    screen.blit(bg, (0, 0))
+    blitRotate(screen, seconds, pos, (w / 2 - 8, h / 2 + 45), angle)
+    blitRotate(screen, minutes, pos, (w / 2 - 15, h / 2 + 10), min)
 
-    clock_frame = pygame.image.load('images/clock.png')
-    cw, ch = clock_frame.get_size()
-    screen.blit(clock_frame, (center[0] - cw / 2, center[1] - ch / 2))
+    # pygame.draw.circle(screen, (0, 255, 0), pos, 7, 0)
 
-    # Screen updating
     pygame.display.flip()
-
-    clock.tick(FPS)

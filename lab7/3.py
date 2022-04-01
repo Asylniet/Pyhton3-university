@@ -4,7 +4,7 @@ import pygame
 pygame.init()
 
 # Creating main window (Surface)
-screen = pygame.display.set_mode((500, 500))  # Surface
+screen = pygame.display.set_mode((490, 490))  # Surface
 running = True
 
 # RGB - Red Green Blue [0-255]
@@ -33,18 +33,17 @@ while running:
     pressed = pygame.key.get_pressed()
 
     if pressed[pygame.K_UP]:
-        if y > 25 :
+        if y >= 45 :
             y -= 20
     if pressed[pygame.K_DOWN]:
-        if y < 475 :
+        if y <= 450 :
             y += 20
     if pressed[pygame.K_LEFT]:
-        if x > 25 :
+        if x >= 45 :
             x -= 20
     if pressed[pygame.K_RIGHT]:
-        if x < 475 :
+        if x <= 455 :
             x += 20
-
     # Refresh the screen
     screen.fill(WHITE)
     pygame.draw.circle(screen, color, (x, y), 25)
