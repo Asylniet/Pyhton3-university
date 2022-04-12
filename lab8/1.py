@@ -27,13 +27,18 @@ font = pygame.font.SysFont("Courier New", 40)
 font_small = pygame.font.SysFont("Courier New", 20)
 game_over = font.render("Game Over", True, WHITE)
 
-main_bg = pygame.image.load('images/main-bg.png')
-background = pygame.image.load("images/bg.png")
+#Setting up Images
+main_bg = pygame.image.load('images/main-bg.png') #BG on game over
+background = pygame.image.load("images/bg.png") #BG on playing
 bg_height = background.get_height()
 tiles = math.ceil(SCREEN_HEIGHT / bg_height) + 1
 bg_rect = background.get_rect()
+coin_image = pygame.image.load('images/coin.png')
+cars_path = os.path.join(os.getcwd(), 'images/cars')
+cars = os.listdir(cars_path)
 scroll = 0
 
+#Setting up Sounds
 coin_sound = pygame.mixer.Sound('sound/coin.mp3')
 game_over_theme_sound = pygame.mixer.Sound('sound/game_over_theme.mp3')
 pygame.mixer.music.load('sound/super_mario.mp3')
@@ -41,13 +46,11 @@ pygame.mixer.music.play(-1)
  
 screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 pygame.display.set_caption("Racer")
-coin_image = pygame.image.load('images/coin.png')
-cars_path = os.path.join(os.getcwd(), 'images/cars')
-cars = os.listdir(cars_path)
 
 class Enemy(pygame.sprite.Sprite):
       def __init__(self):
         super().__init__()
+        #Random car images
         self.image = pygame.image.load(f'images/cars/{cars[random.randint(0, len(cars) - 1)]}')
         self.image = pygame.transform.rotate(self.image, 180)
         self.image = pygame.transform.scale(self.image, (70 ,140))
@@ -81,6 +84,7 @@ class Coin(pygame.sprite.Sprite):
             self.rect.top = 0
             self.rect.center = (random.randint(75, SCREEN_WIDTH - 75), 0)
  
+    #When colliding with others
       def collide(self) :
           self.rect.top = 0
           self.rect.center = (random.randint(75, SCREEN_WIDTH - 75), 0)
@@ -146,7 +150,6 @@ pygame.time.set_timer(INC_SPEED, 1000)
 
 state = 'play'
 while True:     
-    #Cycles through all events occuring  
     for event in pygame.event.get():
         if event.type == INC_SPEED and state == 'play':
             if SPEED <= 10 :
@@ -179,17 +182,21 @@ while True:
         pygame.mixer.music.unpause()
         SCORE += 0.05
         scroll += SPEED - 2
+        #BG infinite scroll
         for i in range(0, tiles) :
             screen.blit(background, (0, (i * bg_height) - bg_height + scroll))
 
         if abs(scroll > bg_height) :
             scroll = 0
 
+        #Score and coins counter
         scores = font_small.render(str(int(SCORE)), True, BLACK)
         coins_text = font_small.render(str(COINS), True, BLACK)
         coin_image = pygame.transform.scale(coin_image, (20, 20))
+        #Rectangles under
         pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - scores.get_width() - 30, 10, scores.get_width() + 20, 30), 0, 5)
         pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - coin_image.get_width() - coins_text.get_width() - 25, 45, coins_text.get_width() + coin_image.get_width() + 20, 30), 0, 5)
+
         screen.blit(scores, (SCREEN_WIDTH - scores.get_width() - 20, 15))    
         screen.blit(coin_image, (SCREEN_WIDTH - coin_image.get_width() - 10, 50))    
         screen.blit(coins_text, (SCREEN_WIDTH - coins_text.get_width() - 30, 50))    
@@ -214,11 +221,13 @@ while True:
         pygame.mixer.music.pause()
         game_over_theme_sound.play()
 
+    #Collecting coins
     if pygame.sprite.spritecollideany(P1, coins):
         coin_sound.play()
         C1.collide()
         COINS += 1   
 
+    #If coin appeares on top of enemy
     if pygame.sprite.spritecollideany(E1, coins):
         C1.collide()
          
